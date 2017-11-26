@@ -540,4 +540,21 @@ class SchemaBuilder
     {
         $this->queryBuilder->query($this->createSql());
     }
+
+    /**
+     * Gets the table drop SQL
+     * @return string
+     */
+    public function dropSql() : string
+    {
+        return "DROP TABLE IF EXISTS {$this->table}";
+    }
+
+    /**
+     * Drops the specified table
+     */
+    public function drop()
+    {
+        $this->queryBuilder->query($this->dropSql());
+    }
 }
