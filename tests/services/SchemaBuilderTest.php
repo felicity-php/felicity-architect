@@ -81,6 +81,7 @@ class SchemaBuilderTest extends TestCase
 
         $row = $row ?? new \stdClass();
 
+        self::assertEquals(1, $row->id);
         self::assertEquals(1234, $row->testBigInt);
         self::assertEquals('blobTest', $row->testBlob);
         self::assertEquals(1, $row->boolTest);
@@ -165,6 +166,7 @@ class SchemaBuilderTest extends TestCase
 
         $row = $row ?? new \stdClass();
 
+        self::assertEquals(1, $row->id);
         self::assertEquals(1234, $row->testBigInt);
         self::assertEquals('blobTest', $row->testBlob);
         self::assertEquals(1, $row->boolTest);
