@@ -44,12 +44,13 @@ class Architect
             'prefix' => Config::get('felicity.architect.prefix'),
         ];
 
-        foreach (array_keys($config) as $key) {
-            if (! isset($overrideConfig[$key])) {
-                continue;
-            }
+        $override = false;
 
-            $config[$key] = $overrideConfig[$key];
+        foreach ($overrideConfig as $key => $val) {
+            $override = true;
+            if (array_key_exists($key, $config)) {
+                $config[$key] = $val;
+            }
         }
 
         $this->connection = new Connection($driver, $config);
