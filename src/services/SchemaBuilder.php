@@ -299,7 +299,11 @@ class SchemaBuilder
         }
 
         foreach ($this->dropForeign as $key) {
-            $sql[] = " DROP FOREIGN KEY {$key}";
+            $sql[] = "DROP FOREIGN KEY {$key}";
+        }
+
+        foreach ($this->dropColumn as $col) {
+            $sql[] = "DROP {$col}";
         }
 
         $build = implode(",\n", $sql);
@@ -381,6 +385,9 @@ class SchemaBuilder
 
     /** @var array $dropForeign */
     private $dropForeign = [];
+
+    /** @var array $dropColumn */
+    private $dropColumn = [];
 
     /**
      * Adds a BIGINT column to the table
@@ -830,6 +837,17 @@ class SchemaBuilder
     public function dropForeign(string $columnName) : self
     {
         $this->dropForeign[] = $columnName;
+        return $this;
+    }
+
+    /**
+     * Drops a column
+     * @param string $columnName
+     * @return self
+     */
+    public function dropColumn(string $columnName) : self
+    {
+        $this->dropColumn[] = $columnName;
         return $this;
     }
 

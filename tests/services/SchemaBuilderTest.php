@@ -131,6 +131,8 @@ class SchemaBuilderTest extends TestCase
 
         Architect::schemaBuilder()->table('mySqlTest2')
             ->rename('mySqlTest3')
+            ->dropForeign('test_mySqlTest3_ibfk_1')
+            ->dropColumn('mySqlTest_id')
             ->alter();
 
         Architect::schemaBuilder()->table('mySqlTest3')->drop();
