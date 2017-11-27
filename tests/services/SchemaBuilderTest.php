@@ -35,7 +35,7 @@ class SchemaBuilderTest extends TestCase
         Architect::schemaBuilder()->table('mySqlTest')->drop();
 
         Architect::schemaBuilder()->table('mySqlTest')
-            ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)
+            ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)->unique()
             ->binary('testBlob')
             ->boolean('boolTest')
             ->char('testChar')->notNull()->default("'a'")
@@ -48,7 +48,7 @@ class SchemaBuilderTest extends TestCase
             ->mediumText('mediumText')
             ->smallInteger('smallInt')
             ->tinyInteger('tinyInt')
-            ->string('testString')
+            ->string('testString')->colWidth(10)->unique()
             ->time('testTime')
             ->timestamp('testTimestamp')
             ->create();
@@ -137,7 +137,7 @@ class SchemaBuilderTest extends TestCase
         Architect::schemaBuilder()->table('mySqlTest')->drop();
 
         Architect::schemaBuilder()->table('mySqlTest')
-            ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)
+            ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)->unique()
             ->binary('testBlob')
             ->boolean('boolTest')
             ->char('testChar')->notNull()->default("'a'")
@@ -150,7 +150,7 @@ class SchemaBuilderTest extends TestCase
             ->mediumText('mediumText')
             ->smallInteger('smallInt')
             ->tinyInteger('tinyInt')
-            ->string('testString')
+            ->string('testString')->colWidth(10)->unique()
             ->time('testTime')
             ->timestamp('testTimestamp')
             ->create();

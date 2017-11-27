@@ -9,8 +9,6 @@
 namespace felicity\architect\services;
 
 use felicity\config\Config;
-use felicity\architect\traits\SchemaColumnTypes;
-use felicity\architect\traits\SchemaForeignKeys;
 use Pixie\QueryBuilder\QueryBuilderHandler as QueryBuilder;
 
 /**
@@ -114,6 +112,10 @@ class SchemaBuilder
 
             if (isset($column['notNull']) && $column['notNull'] !== false) {
                 $thisSql .= ' NOT NULL';
+            }
+
+            if (isset($column['unique']) && $column['unique'] !== false) {
+                $thisSql .= ' UNIQUE';
             }
 
             if (isset($column['default']) && $column['default'] !== false) {
@@ -607,6 +609,21 @@ class SchemaBuilder
         }
 
         $this->columns[$this->current]['default'] = $val;
+
+        return $this;
+    }
+
+    /**
+     * Modifies the current column to be unique
+     * @return self
+     */
+    public function unique() : self
+    {
+        if (! isset($this->columns[$this->current])) {
+            return $this;
+        }
+
+        $this->columns[$this->current]['unique'] = true;
 
         return $this;
     }
