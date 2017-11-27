@@ -191,14 +191,6 @@ class SchemaBuilder
     }
 
     /**
-     * Creates the defined table
-     */
-    public function create()
-    {
-        $this->queryBuilder->query($this->createSql());
-    }
-
-    /**
      * Gets the table drop SQL
      * @return string
      */
@@ -208,11 +200,133 @@ class SchemaBuilder
     }
 
     /**
+     * Gets the alter table sql
+     * @return string
+     */
+    public function alterSql() : string
+    {
+        $sql = [];
+
+        $indexes = [];
+
+        foreach ($this->columns as $colName => $column) {
+            $newName = $column['newName'] ?? $colName;
+            $addFirst = $column['addFirst'] ?? false;
+            $addAfter = $column['addAfter'] ?? false;
+
+            $thisSql = "CHANGE `{$colName}` `{$newName}` {$column['type']}";
+
+            if ($addFirst || $addAfter) {
+                $thisSql = "ADD `{$newName}` {$column['type']}";
+            }
+
+            if (isset($column['colWidth']) &&
+                $column['colWidth'] !== false &&
+                $column['type'] !== 'INTEGER'
+            ) {
+                $thisSql .= "({$column['colWidth']})";
+            }
+
+            if (isset($column['unsigned']) && $column['unsigned'] !== false) {
+                $thisSql .= ' UNSIGNED';
+            }
+
+            if (isset($column['notNull']) && $column['notNull'] !== false) {
+                $thisSql .= ' NOT NULL';
+            }
+
+            if (isset($column['unique']) && $column['unique'] !== false) {
+                $thisSql .= ' UNIQUE';
+            }
+
+            if (isset($column['default']) && $column['default'] !== false) {
+                $thisSql .= " DEFAULT {$column['default']}";
+            }
+
+            if ($addFirst) {
+                $thisSql .= ' FIRST';
+            } elseif ($addAfter) {
+                $thisSql .= " AFTER {$addAfter}";
+            }
+
+            $sql[] = $thisSql;
+
+            if (isset($column['index']) && $column['index'] !== false) {
+                $indexes[] = $colName;
+            }
+        }
+
+        if ($this->db === 'mysql') {
+            foreach ($indexes as $index) {
+                $sql[] = " ADD INDEX(`{$index}`)";
+            }
+        }
+
+        foreach ($this->foreignKeys as $foreignKey) {
+            $column = $foreignKey['column'] ?? false;
+            $references = $foreignKey['references'] ?? false;
+            $on = $foreignKey['on'] ?? false;
+            $onUpdate = $foreignKey['onUpdate'] ?? false;
+            $onDelete = $foreignKey['onDelete'] ?? false;
+
+            if (! $column || ! $references || ! $on) {
+                continue;
+            }
+
+            $on = "{$this->tablePrefix}{$on}";
+
+            $thisSql = "ADD FOREIGN KEY (`{$column}`) REFERENCES `{$on}`(`{$references}`)";
+
+            if ($onUpdate) {
+                $thisSql .= " ON UPDATE {$onUpdate}";
+            }
+
+            if ($onDelete) {
+                $thisSql .= " ON DELETE {$onDelete}";
+            }
+
+            $sql[] = $thisSql;
+        }
+
+        $build = implode(",\n", $sql);
+
+        $sql = "ALTER TABLE {$this->table} \n{$build}";
+
+        return $sql;
+    }
+
+    /**
+     * Creates the defined table
+     */
+    public function create()
+    {
+        $this->queryBuilder->query($this->createSql());
+    }
+
+    /**
      * Drops the specified table
      */
     public function drop()
     {
         $this->queryBuilder->query($this->dropSql());
+    }
+
+    /**
+     * Alters the specified table
+     * @throws \Exception
+     */
+    public function alter()
+    {
+        if ($this->db !== 'mysql') {
+            throw new \Exception(
+                'Modifying an SQLite table is currently not supported because' .
+                "\nyou have to re-define the table and create a new one. See" .
+                "\nthis article on how to do it manually:\n" .
+                'https://www.techonthenet.com/sqlite/tables/alter_table.php'
+            );
+        }
+
+        $this->queryBuilder->query($this->alterSql());
     }
 
 
@@ -651,6 +765,53 @@ class SchemaBuilder
         }
 
         $this->columns[$this->current]['index'] = true;
+
+        return $this;
+    }
+
+    /**
+     * Changes the column name
+     * @param string $newName
+     * @return self
+     */
+    public function changeName(string $newName) : self
+    {
+        if (! isset($this->columns[$this->current])) {
+            return $this;
+        }
+
+        $this->columns[$this->current]['newName'] = $newName;
+
+        return $this;
+    }
+
+    /**
+     * Adds the current column as the first column on the table
+     * @return self
+     */
+    public function addFirst() : self
+    {
+        if (! isset($this->columns[$this->current])) {
+            return $this;
+        }
+
+        $this->columns[$this->current]['addFirst'] = true;
+
+        return $this;
+    }
+
+    /**
+     * Changes the column name
+     * @param string $columnName
+     * @return self
+     */
+    public function addAfter(string $columnName) : self
+    {
+        if (! isset($this->columns[$this->current])) {
+            return $this;
+        }
+
+        $this->columns[$this->current]['addAfter'] = $columnName;
 
         return $this;
     }

@@ -114,6 +114,11 @@ class SchemaBuilderTest extends TestCase
                 ->onDelete('CASCADE')
             ->create();
 
+        Architect::schemaBuilder()->table('mySqlTest2')
+            ->integer('mySqlTest_id')->colWidth(12)->unsigned()->notNull()
+            ->string('test')->colWidth(4)->addAfter('mySqlTest_id')->index()
+            ->alter();
+
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
     }
