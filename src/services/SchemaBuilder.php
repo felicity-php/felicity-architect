@@ -96,6 +96,8 @@ class SchemaBuilder
             $map['pk'][$db]
         ];
 
+        $indexes = [];
+
         foreach ($this->columns as $colName => $column) {
             $thisSql = "`{$colName}` {$column['type']}";
 
@@ -123,11 +125,21 @@ class SchemaBuilder
             }
 
             $sql[] = $thisSql;
+
+            if (isset($column['index']) && $column['index'] !== false) {
+                $indexes[] = $colName;
+            }
         }
 
         $sql[] = '`dateCreated` DATETIME';
         $sql[] = '`dateUpdated` DATETIME';
         $sql[] = '`uid` CHAR(24)';
+
+        if ($this->db === 'mysql') {
+            foreach ($indexes as $index) {
+                $sql[] = "INDEX(`{$index}`)";
+            }
+        }
 
         foreach ($this->foreignKeys as $foreignKey) {
             $column = $foreignKey['column'] ?? false;
@@ -624,6 +636,21 @@ class SchemaBuilder
         }
 
         $this->columns[$this->current]['unique'] = true;
+
+        return $this;
+    }
+
+    /**
+     * Adds an index to the current column
+     * @return self
+     */
+    public function index() : self
+    {
+        if (! isset($this->columns[$this->current])) {
+            return $this;
+        }
+
+        $this->columns[$this->current]['index'] = true;
 
         return $this;
     }

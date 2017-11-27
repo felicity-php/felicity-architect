@@ -36,6 +36,7 @@ class SchemaBuilderTest extends TestCase
 
         Architect::schemaBuilder()->table('mySqlTest')
             ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)->unique()
+            ->string('testIndex')->colWidth(10)->index()
             ->binary('testBlob')
             ->boolean('boolTest')
             ->char('testChar')->notNull()->default("'a'")
@@ -138,6 +139,7 @@ class SchemaBuilderTest extends TestCase
 
         Architect::schemaBuilder()->table('mySqlTest')
             ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)->unique()
+            ->string('testIndex')->colWidth(10)->index()
             ->binary('testBlob')
             ->boolean('boolTest')
             ->char('testChar')->notNull()->default("'a'")
