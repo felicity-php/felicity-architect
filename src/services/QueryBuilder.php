@@ -100,4 +100,24 @@ class QueryBuilder extends QueryBuilderHandler
 
         return parent::update($data);
     }
+
+    /**
+     * Checks if a table exists
+     * @param $tableName
+     * @return bool
+     */
+    public function tableExists($tableName) : bool
+    {
+        if ($this->tablePrefix) {
+            $tableName = "{$this->tablePrefix}{$tableName}";
+        }
+
+        $sql = "SHOW TABLES LIKE '{$tableName}'";
+
+        if ($this->adapter !== 'mysql') {
+            $sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='{$tableName}'";
+        }
+
+        return \count($this->query($sql)->get()) > 0;
+    }
 }

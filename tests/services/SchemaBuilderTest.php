@@ -28,12 +28,14 @@ class SchemaBuilderTest extends TestCase
             'database' => 'site',
             'username' => 'site',
             'password' => 'secret',
-            'prefix' => 'test_'
+            'prefix' => 'test_',
         ]);
 
         Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
+
+        self::assertFalse(Architect::get()->tableExists('mySqlTest'));
 
         Architect::schemaBuilder()->table('mySqlTest')
             ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)->unique()
@@ -55,10 +57,7 @@ class SchemaBuilderTest extends TestCase
             ->timestamp('testTimestamp')
             ->create();
 
-        self::assertEquals(
-            'test_mySqlTest',
-            Architect::get()->query('SHOW TABLES')->get()[0]->Tables_in_site
-        );
+        self::assertTrue(Architect::get()->tableExists('mySqlTest'));
 
         Architect::get()->table('mySqlTest')->insert([
             'testBigInt' => 1234,
@@ -106,6 +105,8 @@ class SchemaBuilderTest extends TestCase
         self::assertEquals($dateFormat, $row->dateUpdated);
         self::assertNotEmpty($row->uid);
 
+        self::assertFalse(Architect::get()->tableExists('mySqlTest2'));
+
         Architect::schemaBuilder()->table('mySqlTest2')
             ->integer('mySqlTest_id')->colWidth(10)->unsigned()->notNull()
             ->foreign('mySqlTest_id')
@@ -114,6 +115,8 @@ class SchemaBuilderTest extends TestCase
                 ->onUpdate('CASCADE')
                 ->onDelete('CASCADE')
             ->create();
+
+        self::assertTrue(Architect::get()->tableExists('mySqlTest2'));
 
         Architect::schemaBuilder()->table('mySqlTest2')
             ->integer('mySqlTest_id')->colWidth(12)->unsigned()->notNull()
@@ -134,6 +137,9 @@ class SchemaBuilderTest extends TestCase
             ->dropForeign('test_mySqlTest3_ibfk_1')
             ->dropColumn('mySqlTest_id')
             ->alter();
+
+        self::assertFalse(Architect::get()->tableExists('mySqlTest2'));
+        self::assertTrue(Architect::get()->tableExists('mySqlTest3'));
 
         Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
@@ -156,8 +162,12 @@ class SchemaBuilderTest extends TestCase
             'prefix' => 'test_'
         ]);
 
+
+        Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
+
+        self::assertFalse(Architect::get()->tableExists('mySqlTest'));
 
         Architect::schemaBuilder()->table('mySqlTest')
             ->bigInteger('testBigInt')->colWidth(30)->notNull()->unsigned()->default(10)->unique()
@@ -179,12 +189,7 @@ class SchemaBuilderTest extends TestCase
             ->timestamp('testTimestamp')
             ->create();
 
-        self::assertEquals(
-            'test_mySqlTest',
-            Architect::get()
-                ->query("SELECT * FROM sqlite_master WHERE type='table'")
-                ->get()[0]->name
-        );
+        self::assertTrue(Architect::get()->tableExists('mySqlTest'));
 
         Architect::get()->table('mySqlTest')->insert([
             'testBigInt' => 1234,
@@ -232,6 +237,8 @@ class SchemaBuilderTest extends TestCase
         self::assertEquals($dateFormat, $row->dateUpdated);
         self::assertNotEmpty($row->uid);
 
+        self::assertFalse(Architect::get()->tableExists('mySqlTest2'));
+
         Architect::schemaBuilder()->table('mySqlTest2')
             ->integer('mySqlTest_id')->colWidth(10)->unsigned()->notNull()
             ->foreign('mySqlTest_id')
@@ -241,8 +248,13 @@ class SchemaBuilderTest extends TestCase
                 ->onDelete('CASCADE')
             ->create();
 
+        self::assertTrue(Architect::get()->tableExists('mySqlTest2'));
+
         Architect::schemaBuilder()->table('mySqlTest2')
             ->rename('mySqlTest3');
+
+        self::assertFalse(Architect::get()->tableExists('mySqlTest2'));
+        self::assertTrue(Architect::get()->tableExists('mySqlTest3'));
 
         Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
