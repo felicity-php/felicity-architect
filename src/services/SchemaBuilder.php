@@ -329,6 +329,28 @@ class SchemaBuilder
         $this->queryBuilder->query($this->alterSql());
     }
 
+    /**
+     * Renames the specified table
+     * @param string $newName
+     * @return self
+     */
+    public function rename(string $newName) : self
+    {
+        $newName = "{$this->tablePrefix}{$newName}";
+
+        $sql = "RENAME TABLE `{$this->table}` TO `{$newName}`";
+
+        if ($this->db !== 'mysql') {
+            $sql = "ALTER TABLE `{$this->table}` RENAME TO `{$newName}`";
+        }
+
+        $this->queryBuilder->query($sql);
+
+        $this->table = $newName;
+
+        return $this;
+    }
+
 
     /*==========================================================================
         SchemaColumnTypes (formerly a trait)

@@ -31,6 +31,7 @@ class SchemaBuilderTest extends TestCase
             'prefix' => 'test_'
         ]);
 
+        Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
 
@@ -119,6 +120,10 @@ class SchemaBuilderTest extends TestCase
             ->string('test')->colWidth(4)->addAfter('mySqlTest_id')->index()
             ->alter();
 
+        Architect::schemaBuilder()->table('mySqlTest2')
+            ->rename('mySqlTest3');
+
+        Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
     }
@@ -224,6 +229,10 @@ class SchemaBuilderTest extends TestCase
                 ->onDelete('CASCADE')
             ->create();
 
+        Architect::schemaBuilder()->table('mySqlTest2')
+            ->rename('mySqlTest3');
+
+        Architect::schemaBuilder()->table('mySqlTest3')->drop();
         Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
 
