@@ -31,6 +31,7 @@ class SchemaBuilderTest extends TestCase
             'prefix' => 'test_'
         ]);
 
+        Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
 
         Architect::schemaBuilder()->table('mySqlTest')
@@ -103,6 +104,16 @@ class SchemaBuilderTest extends TestCase
         self::assertEquals($dateFormat, $row->dateUpdated);
         self::assertNotEmpty($row->uid);
 
+        Architect::schemaBuilder()->table('mySqlTest2')
+            ->integer('mySqlTest_id')->colWidth(10)->unsigned()->notNull()
+            ->foreign('mySqlTest_id')
+                ->references('id')
+                ->on('mySqlTest')
+                ->onUpdate('CASCADE')
+                ->onDelete('CASCADE')
+            ->create();
+
+        Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
     }
 
@@ -114,12 +125,15 @@ class SchemaBuilderTest extends TestCase
     {
         $sqliteDb = \dirname(__DIR__) . '/test.sqlite';
 
+        file_put_contents($sqliteDb, '');
+
         Config::set('felicity.architect', [
             'driver' => 'sqlite',
             'database' => $sqliteDb,
             'prefix' => 'test_'
         ]);
 
+        Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
 
         Architect::schemaBuilder()->table('mySqlTest')
@@ -194,6 +208,18 @@ class SchemaBuilderTest extends TestCase
         self::assertEquals($dateFormat, $row->dateUpdated);
         self::assertNotEmpty($row->uid);
 
+        Architect::schemaBuilder()->table('mySqlTest2')
+            ->integer('mySqlTest_id')->colWidth(10)->unsigned()->notNull()
+            ->foreign('mySqlTest_id')
+                ->references('id')
+                ->on('mySqlTest')
+                ->onUpdate('CASCADE')
+                ->onDelete('CASCADE')
+            ->create();
+
+        Architect::schemaBuilder()->table('mySqlTest2')->drop();
         Architect::schemaBuilder()->table('mySqlTest')->drop();
+
+        file_put_contents($sqliteDb, '');
     }
 }
