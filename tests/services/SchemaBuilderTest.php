@@ -118,6 +118,14 @@ class SchemaBuilderTest extends TestCase
         Architect::schemaBuilder()->table('mySqlTest2')
             ->integer('mySqlTest_id')->colWidth(12)->unsigned()->notNull()
             ->string('test')->colWidth(4)->addAfter('mySqlTest_id')->index()
+            ->integer('newTestMySqlTest_id')->addAfter('mySqlTest_id')->colWidth(10)->unsigned()->notNull()
+            ->foreign('newTestMySqlTest_id')
+                ->references('id')
+                ->on('mySqlTest')
+            ->alter();
+
+        Architect::schemaBuilder()->table('mySqlTest2')
+            ->dropIndex('test')
             ->alter();
 
         Architect::schemaBuilder()->table('mySqlTest2')

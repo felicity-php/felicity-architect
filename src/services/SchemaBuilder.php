@@ -209,6 +209,8 @@ class SchemaBuilder
 
         $indexes = [];
 
+        $dropIndexes = [];
+
         foreach ($this->columns as $colName => $column) {
             $newName = $column['newName'] ?? $colName;
             $addFirst = $column['addFirst'] ?? false;
@@ -253,12 +255,20 @@ class SchemaBuilder
 
             if (isset($column['index']) && $column['index'] !== false) {
                 $indexes[] = $colName;
+            } elseif (isset($column['dropIndex']) &&
+                $column['dropIndex'] !== false
+            ) {
+                $dropIndexes[] = $colName;
             }
         }
 
         if ($this->db === 'mysql') {
             foreach ($indexes as $index) {
                 $sql[] = " ADD INDEX(`{$index}`)";
+            }
+
+            foreach ($this->dropIndex as $index) {
+                $sql[] = " DROP INDEX {$index}";
             }
         }
 
@@ -361,6 +371,9 @@ class SchemaBuilder
 
     /** @var string $current */
     private $current;
+
+    /** @var array $dropIndex */
+    private $dropIndex = [];
 
     /**
      * Adds a BIGINT column to the table
@@ -788,6 +801,17 @@ class SchemaBuilder
 
         $this->columns[$this->current]['index'] = true;
 
+        return $this;
+    }
+
+    /**
+     * Drops an index to the current column
+     * @param string $columnName
+     * @return self
+     */
+    public function dropIndex(string $columnName) : self
+    {
+        $this->dropIndex[] = $columnName;
         return $this;
     }
 
