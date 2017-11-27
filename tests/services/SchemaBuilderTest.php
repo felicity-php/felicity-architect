@@ -8,6 +8,7 @@
 
 namespace tests\services;
 
+use DateTime;
 use felicity\config\Config;
 use PHPUnit\Framework\TestCase;
 use felicity\architect\Architect;
@@ -81,6 +82,9 @@ class SchemaBuilderTest extends TestCase
 
         $row = $row ?? new \stdClass();
 
+        $dateTime = new DateTime();
+        $dateFormat = $dateTime->format('Y-m-d h:i:s');
+
         self::assertEquals(1, $row->id);
         self::assertEquals(1234, $row->testBigInt);
         self::assertEquals('blobTest', $row->testBlob);
@@ -95,6 +99,9 @@ class SchemaBuilderTest extends TestCase
         self::assertEquals(1, $row->tinyInt);
         self::assertEquals('stringTest', $row->testString);
         self::assertEquals('2017-11-26 15:08:01', $row->testTimestamp);
+        self::assertEquals($dateFormat, $row->dateCreated);
+        self::assertEquals($dateFormat, $row->dateUpdated);
+        self::assertNotEmpty($row->uid);
 
         Architect::schemaBuilder()->table('mySqlTest')->drop();
     }
@@ -166,6 +173,9 @@ class SchemaBuilderTest extends TestCase
 
         $row = $row ?? new \stdClass();
 
+        $dateTime = new DateTime();
+        $dateFormat = $dateTime->format('Y-m-d h:i:s');
+
         self::assertEquals(1, $row->id);
         self::assertEquals(1234, $row->testBigInt);
         self::assertEquals('blobTest', $row->testBlob);
@@ -180,6 +190,9 @@ class SchemaBuilderTest extends TestCase
         self::assertEquals(1, $row->tinyInt);
         self::assertEquals('stringTest', $row->testString);
         self::assertEquals('2017-11-26 15:08:01', $row->testTimestamp);
+        self::assertEquals($dateFormat, $row->dateCreated);
+        self::assertEquals($dateFormat, $row->dateUpdated);
+        self::assertNotEmpty($row->uid);
 
         Architect::schemaBuilder()->table('mySqlTest')->drop();
     }

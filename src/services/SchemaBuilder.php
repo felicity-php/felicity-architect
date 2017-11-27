@@ -12,7 +12,7 @@ use felicity\config\Config;
 use Pixie\QueryBuilder\QueryBuilderHandler as QueryBuilder;
 
 /**
- * Class Architect
+ * Class SchemaBuilder
  */
 class SchemaBuilder
 {
@@ -509,6 +509,10 @@ class SchemaBuilder
 
             $sql[] = $thisSql;
         }
+
+        $sql[] = '`dateCreated` DATETIME';
+        $sql[] = '`dateUpdated` DATETIME';
+        $sql[] = '`uid` CHAR(24)';
 
         $build = implode(",\n", $sql);
 

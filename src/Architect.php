@@ -11,8 +11,9 @@ namespace felicity\architect;
 use Pixie\Exception;
 use Pixie\Connection;
 use felicity\config\Config;
+use felicity\architect\services\Uid;
+use felicity\architect\services\QueryBuilder;
 use felicity\architect\services\SchemaBuilder;
-use Pixie\QueryBuilder\QueryBuilderHandler as QueryBuilder;
 
 /**
  * Class Architect
@@ -44,10 +45,7 @@ class Architect
             'prefix' => Config::get('felicity.architect.prefix'),
         ];
 
-        $override = false;
-
         foreach ($overrideConfig as $key => $val) {
-            $override = true;
             if (array_key_exists($key, $config)) {
                 $config[$key] = $val;
             }
@@ -86,7 +84,10 @@ class Architect
      */
     public function getBuilder() : QueryBuilder
     {
-        return new QueryBuilder($this->connection);
+        return new QueryBuilder(
+            new Uid(),
+            $this->connection
+        );
     }
 
     /**
