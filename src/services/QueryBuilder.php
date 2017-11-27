@@ -103,10 +103,10 @@ class QueryBuilder extends QueryBuilderHandler
 
     /**
      * Checks if a table exists
-     * @param $tableName
+     * @param string $tableName
      * @return bool
      */
-    public function tableExists($tableName) : bool
+    public function tableExists(string $tableName) : bool
     {
         if ($this->tablePrefix) {
             $tableName = "{$this->tablePrefix}{$tableName}";
@@ -116,6 +116,36 @@ class QueryBuilder extends QueryBuilderHandler
 
         if ($this->adapter !== 'mysql') {
             $sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='{$tableName}'";
+        }
+
+        return \count($this->query($sql)->get()) > 0;
+    }
+
+    /**
+     * Checks if a column exists on a table
+     * @param string $colName
+     * @param string $tableName
+     * @return bool
+     */
+    public function columnExists(string $colName, string $tableName) : bool
+    {
+        if ($this->tablePrefix) {
+            $tableName = "{$this->tablePrefix}{$tableName}";
+        }
+
+        $sql = "SHOW COLUMNS FROM `{$tableName}` LIKE '{$colName}'";
+
+        if ($this->adapter !== 'mysql') {
+            $sql = "PRAGMA table_info('{$tableName}')";
+            $colExists = false;
+            foreach ($this->query($sql)->get() as $item) {
+                if ($item->name !== $colName) {
+                    continue;
+                }
+                $colExists = true;
+                break;
+            }
+            return $colExists;
         }
 
         return \count($this->query($sql)->get()) > 0;

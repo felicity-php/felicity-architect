@@ -59,6 +59,9 @@ class SchemaBuilderTest extends TestCase
 
         self::assertTrue(Architect::get()->tableExists('mySqlTest'));
 
+        self::assertFalse(Architect::get()->columnExists('sadf', 'mySqlTest'));
+        self::assertTrue(Architect::get()->columnExists('testIndex', 'mySqlTest'));
+
         Architect::get()->table('mySqlTest')->insert([
             'testBigInt' => 1234,
             'testBlob' => 'blobTest',
@@ -189,7 +192,12 @@ class SchemaBuilderTest extends TestCase
             ->timestamp('testTimestamp')
             ->create();
 
+
         self::assertTrue(Architect::get()->tableExists('mySqlTest'));
+
+        self::assertFalse(Architect::get()->columnExists('sadf', 'mySqlTest'));
+        self::assertTrue(Architect::get()->columnExists('testIndex', 'mySqlTest'));
+
 
         Architect::get()->table('mySqlTest')->insert([
             'testBigInt' => 1234,
