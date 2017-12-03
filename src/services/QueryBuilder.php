@@ -11,6 +11,7 @@ namespace felicity\architect\services;
 use DateTime;
 use Pixie\Exception;
 use Pixie\Connection;
+use felicity\logging\Logger;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
 /**
@@ -21,27 +22,64 @@ class QueryBuilder extends QueryBuilderHandler
     /** @var Uid $uidService */
     private $uidService;
 
+    /** @var Logger $logger */
+    private $logger;
+
     /**
      * QueryBuilder constructor
      * @param Uid $uidService
+     * @param Logger $logger
      * @param Connection $connection
      * @throws Exception
      */
-    public function __construct(Uid $uidService, Connection $connection)
-    {
+    public function __construct(
+        Uid $uidService,
+        Logger $logger,
+        Connection $connection
+    ) {
         $this->uidService = $uidService;
+        $this->logger = $logger;
         parent::__construct($connection);
+    }
+
+    /**
+     * @param string $sql
+     * @param array $bindings
+     * @return array PDOStatement and execution time as float
+     */
+    public function statement($sql, $bindings = []) : array
+    {
+        $start = microtime(true);
+
+        $this->logger->addLog(
+            "Architect running query at {$start}: {$this->interpolateQuery($sql, $bindings)}",
+            Logger::LEVEL_INFO,
+            'felicityArchitect'
+        );
+
+        $return = parent::statement($sql, $bindings);
+
+        $end = microtime(true);
+
+        $time = $end - $start . 's';
+
+        $this->logger->addLog(
+            "Architect query ended at {$end}. Time: {$time}",
+            Logger::LEVEL_INFO,
+            'felicityArchitect'
+        );
+
+        return $return;
     }
 
     /**
      * Gets a new query
      * @param Connection $connection
      * @return static
-     * @throws Exception
      */
     public function newQuery(Connection $connection = null)
     {
-        return new static($this->uidService, $connection);
+        return new static($this->uidService, $this->logger, $connection);
     }
 
     /**
@@ -49,7 +87,6 @@ class QueryBuilder extends QueryBuilderHandler
      * @param string|array $tables Single table or multiple tables as an array
      *                             or as multiple parameters
      * @return static
-     * @throws Exception
      */
     public function table($tables)
     {
@@ -59,7 +96,7 @@ class QueryBuilder extends QueryBuilderHandler
             $tables = \func_get_args();
         }
 
-        $instance = new static($this->uidService, $this->connection);
+        $instance = new static($this->uidService, $this->logger, $this->connection);
         $tables = $this->addTablePrefix($tables, false);
         $instance->addStatement('tables', $tables);
         return $instance;
@@ -149,5 +186,32 @@ class QueryBuilder extends QueryBuilderHandler
         }
 
         return \count($this->query($sql)->get()) > 0;
+    }
+
+    /**
+     * Replaces any parameter placeholders in a query with the value of that
+     * parameter. Useful for debugging. Assumes anonymous parameters from
+     * $params are are in the same order as specified in $query
+     * @param string $query The sql query with parameter placeholders
+     * @param array $params The array of substitution parameters
+     * @return string The interpolated query
+     */
+    private function interpolateQuery(string $query, array $params)
+    {
+        $keys = [];
+
+        # Build a regular expression for each parameter
+        foreach (array_keys($params) as $key) {
+            if (\is_string($key)) {
+                $keys[] = '/:'.$key.'/';
+                continue;
+            }
+
+            $keys[] = '/[?]/';
+        }
+
+        $query = preg_replace($keys, $params, $query, 1, $count);
+
+        return $query;
     }
 }

@@ -8,9 +8,9 @@
 
 namespace felicity\architect;
 
-use Pixie\Exception;
 use Pixie\Connection;
 use felicity\config\Config;
+use felicity\logging\Logger;
 use felicity\architect\services\Uid;
 use felicity\architect\services\QueryBuilder;
 use felicity\architect\services\SchemaBuilder;
@@ -51,6 +51,13 @@ class Architect
             }
         }
 
+        Logger::log(
+            'Architect creating database connection instance with config: ' .
+                var_export($config, true),
+            Logger::LEVEL_INFO,
+            'felicityArchitect'
+        );
+
         $this->connection = new Connection($driver, $config);
     }
 
@@ -70,7 +77,6 @@ class Architect
     /**
      * Gets an instance of the query builder
      * @return QueryBuilder
-     * @throws Exception
      */
     public static function get() : QueryBuilder
     {
@@ -80,12 +86,12 @@ class Architect
     /**
      * Gets an instance of the query builder
      * @return QueryBuilder
-     * @throws Exception
      */
     public function getBuilder() : QueryBuilder
     {
         return new QueryBuilder(
             new Uid(),
+            Logger::getInstance(),
             $this->connection
         );
     }
@@ -93,7 +99,6 @@ class Architect
     /**
      * Gets an instance of the schema builder
      * @return SchemaBuilder
-     * @throws Exception
      */
     public static function schemaBuilder() : SchemaBuilder
     {
@@ -103,7 +108,6 @@ class Architect
     /**
      * Gets an instance of the schema builder
      * @return SchemaBuilder
-     * @throws Exception
      */
     public function getSchemaBuilder() : SchemaBuilder
     {
